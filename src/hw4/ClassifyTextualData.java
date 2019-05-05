@@ -10,7 +10,6 @@ package hw4;
  */
 
 
-
 public class ClassifyTextualData {
 
 	public static void main(String[] args) {

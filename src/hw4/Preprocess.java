@@ -4,10 +4,9 @@ package hw4;
  * @author Jane Liu
  * Homework 4
  * 
- * Class:
- * 	Preprocess:
- * 		Reads the unknown files, cleans the data, tokenizes, removes stopwords, lemmatizes, finds the most frequent 
- * 		unigrams and bigrams, creates the document term matrix and transforms with TF-IDF.
+ * Preprocess class:
+ * 	Reads the unknown files, cleans the data, tokenizes, removes stopwords, lemmatizes, finds the most frequent 
+ * 	unigrams and bigrams, creates the document term matrix and transforms with TF-IDF. Returns the processed corpus.
  *
  */
 
@@ -89,6 +88,7 @@ public class Preprocess {
 			}
 		}
 		
+		// clean and remove punctuation, weird characters, etc. 
 		for (String word : tempwords) {
 			if(word=="" || word==null || word=="–") {
 			}else {
@@ -100,7 +100,7 @@ public class Preprocess {
 				word = word.replaceAll("\\[", "");
 				tokens.add(word);
 			}
-		}
+		}tempwords.clear();
 		
 		// remove stopwords
 		try {
@@ -131,22 +131,22 @@ public class Preprocess {
 		}
 		tokens.removeAll(Collections.singleton(""));
 
-		// lemmatize the corpus with Stanford NLP
-        String text = "";
-        for (String token : tokens) {
-        	text += token + " ";
-        }
-        tokens.clear();
-        
-        List<String> lems = new ArrayList<String>();
-        lems = lemmatize(text);
-        
-        for (String l : lems) { 
-        	if (l.matches("/s")){
-        	} else {
-        		tokens.add(l);
-        	} 
-        }
+//		// lemmatize the corpus with Stanford NLP
+//        String text = "";
+//        for (String token : tokens) {
+//        	text += token + " ";
+//        }
+//        tokens.clear();
+//        
+//        List<String> lems = new ArrayList<String>();
+//        lems = lemmatize(text);
+//        
+//        for (String l : lems) { 
+//        	if (l.matches("/s")){
+//        	} else {
+//        		tokens.add(l);
+//        	} 
+//        }
 		
 		// Find ngrams
 		List<String> ngramList = new ArrayList<String>();
@@ -206,11 +206,8 @@ public class Preprocess {
 			System.out.println(key + ": " + val);
 		}
 
-		// create TF-IDF matrix
-		List<String> matrix = new ArrayList<String>();
-		List<String> documents = new ArrayList<String>();
-		
-		
+		DocMatrix docmatrix = new DocMatrix();
+		docmatrix.generate(ngramList);
 		
 	}
 	
