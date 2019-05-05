@@ -1,11 +1,15 @@
 package hw4;
 
 /**
- * Jane Liu
+ * @author Jane Liu
  * Homework 4
+ * 
+ * Class:
+ * 	Preprocess:
+ * 		Reads the unknown files, cleans the data, tokenizes, removes stopwords, lemmatizes, finds the most frequent 
+ * 		unigrams and bigrams, creates the document term matrix and transforms with TF-IDF.
  *
  */
-
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -28,9 +32,14 @@ import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TextAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
-import edu.stanford.nlp.patterns.surface.Token;
+import edu.stanford.nlp.ling.CoreAnnotations.LemmaAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.CoreAnnotations.TokensAnnotation;
 import edu.stanford.nlp.ling.CoreLabel;
+import edu.stanford.nlp.patterns.surface.Token;
 import edu.stanford.nlp.pipeline.*;
+import edu.stanford.nlp.pipeline.Annotation;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import edu.stanford.nlp.util.CoreMap;
 
 
@@ -122,29 +131,22 @@ public class Preprocess {
 		}
 		tokens.removeAll(Collections.singleton(""));
 
-//		// set up Stanford Core NLP pipeline properties
-//	    Properties props = new Properties();
-//	    props.setProperty("annotators", "tokenize, ssplit, pos, lemma, ner");
-//	    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
-//	    
-//	    // the following has examples for the new Core Wrapper API and the older Annotation API
-//	    // example using Core Wrappers (new API designed to make it easier to work with NLP data)
-//	    System.out.println("---");
-//	    System.out.println("Accessing Tokens In A CoreDocument");
-//	    System.out.println("(text, char offset begin, char offset end)");
-//	    CoreDocument exampleDocument = new CoreDocument("Here is the text to tokenize.");
-//	    
-//	    // annotate document
-//	    pipeline.annotate(exampleDocument);
-//	    
-//	    // access tokens from a CoreDocument
-//	    // a token is represented by a CoreLabel
-//	    List<CoreLabel> firstSentenceTokens = exampleDocument.sentences().get(0).tokens();
-//	    
-//	    // this for loop will print out all of the tokens and the character offset info
-//	    for (CoreLabel token : firstSentenceTokens) {
-//	      System.out.println(token.word() + "\t" + token.beginPosition() + "\t" + token.endPosition());
-//	    }
+		// lemmatize the corpus with Stanford NLP
+        String text = "";
+        for (String token : tokens) {
+        	text += token + " ";
+        }
+        tokens.clear();
+        
+        List<String> lems = new ArrayList<String>();
+        lems = lemmatize(text);
+        
+        for (String l : lems) { 
+        	if (l.matches("/s")){
+        	} else {
+        		tokens.add(l);
+        	} 
+        }
 		
 		// Find ngrams
 		List<String> ngramList = new ArrayList<String>();
@@ -175,27 +177,26 @@ public class Preprocess {
 			else { bigrams.put(grams, 1); }
 		}ngramList.clear();
 		
-		// top 20 most frequent unigrams and bigrams
+		// get top 30 most frequent unigrams and bigrams
 		Map<String, Integer> ngrams_temp = new HashMap<String, Integer>();
-		n = 20;
+		n = 30;
 		
+		// extract top 30 unigrams
 		List<Entry<String, Integer>> max_one = getMax(unigrams, n);
 		for (Entry<String, Integer> entry : max_one) { 
 			String key = entry.getKey();
 			int val = entry.getValue();
 			ngrams_temp.put(key, val);
 		} 
-		
+		// extract top 30 bigrams
 		List<Entry<String, Integer>> max_two = getMax(bigrams, n);
 		for (Entry<String, Integer> entry : max_two) {
 			String key = entry.getKey();
 			int val = entry.getValue();
 			ngrams_temp.put(key, val);
 		}
-		
-		// top 30 most frequent ngrams
-		n = 30;
-		
+
+		// find the top 30 out of 60 most frequent ngrams
 		List<Entry<String, Integer>> top_ngrams = getMax(ngrams_temp, n);
 		System.out.println("Top " + n + " unigrams and bigrams: ");
 		for (Entry<String, Integer> entry : top_ngrams) {
@@ -204,11 +205,47 @@ public class Preprocess {
 			ngramList.add(key);
 			System.out.println(key + ": " + val);
 		}
-		
-		// create TF-IDF matrix
-		
 
+		// create TF-IDF matrix
+		List<String> matrix = new ArrayList<String>();
+		List<String> documents = new ArrayList<String>();
 		
+		
+		
+	}
+	
+	private static List<String> lemmatize(String documentText) {
+
+		// set up pipeline properties
+	    Properties props = new Properties();
+	    props.setProperty("annotators", "tokenize, ssplit, pos, lemma,ner");
+	
+	    // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
+	    props.setProperty("coref.algorithm", "neural");
+	    
+	    // build pipeline
+	    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
+	
+	    List<String> lemmas = new LinkedList<String>();
+	    
+	    // Create an empty Annotation just with the given text
+	    Annotation document = new Annotation(documentText);
+	    
+	    // run all Annotators on this text
+	    pipeline.annotate(document);
+	    
+	    // Iterate over all of the sentences found
+	    List<CoreMap> sentences = document.get(SentencesAnnotation.class);
+	    
+	    for(CoreMap sentence: sentences) {
+	        // Iterate over all tokens in a sentence
+	        for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
+	            // Retrieve and add the lemma for each word into the
+	            // list of lemmas
+	            lemmas.add(token.get(LemmaAnnotation.class));
+	        }
+	    }
+	    return lemmas;
 	}
 	
 	// get top unigrams and bigrams

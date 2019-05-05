@@ -2,8 +2,11 @@ package hw4;
 
 /**
  * @author Jane Liu
- * @assignment Homework 4
- *
+ * Homework 4
+ * 
+ * Class:
+ * 	ClassifyTextualData:
+ * 		Main class of this project. Calls the preprocessor class and KNN class.
  */
 
 
