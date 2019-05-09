@@ -44,13 +44,15 @@ import edu.stanford.nlp.util.CoreMap;
 
 public class Preprocess {
 	
-	public static void start() {
+	public List<String> ngramList = new ArrayList<String>();
+	
+	public List<double[]> start() {
 		
 		List<String> docs = new ArrayList<String>();
 		List<String> stopwords = new ArrayList<String>();
 		List<String> tempwords = new ArrayList<String>();
 		List<String> tokens = new ArrayList<String>();
-		String filename = "data/documents.txt";
+		String filename = "data/known_docs.txt";
 
 		// read list of file names
 		BufferedReader reader;
@@ -149,9 +151,10 @@ public class Preprocess {
 //        }
 		
 		// Find ngrams
-		List<String> ngramList = new ArrayList<String>();
 		Map<String, Integer> unigrams = new HashMap<String, Integer>();
 		Map<String, Integer> bigrams = new HashMap<String, Integer>();
+		Map<String, Integer> trigrams = new HashMap<String, Integer>();
+		Map<String, Integer> fourgrams = new HashMap<String, Integer>();
 		
 		// unigrams
 		for (String grams: tokens) {
@@ -160,15 +163,12 @@ public class Preprocess {
 		}
 				
 		// bigrams
-		int k = 1;
 		int n = 2;
+		int k = 1;
 		String ngramstr = "";
 		for (int j=0; j<tokens.size()-n; j++) {
 			ngramstr = tokens.get(j);			
-			while (k < n) {
-				ngramstr += " " + tokens.get(j+k);
-				k++;
-			}
+			while (k < n) { ngramstr += " " + tokens.get(j+k); k++; }
 			k = 1;
 			ngramList.add(ngramstr);
 		}
@@ -177,75 +177,117 @@ public class Preprocess {
 			else { bigrams.put(grams, 1); }
 		}ngramList.clear();
 		
-		// get top 30 most frequent unigrams and bigrams
+		// Find trigrams
+		n = 3;
+		k = 1;
+		for (int l=0; l<tokens.size()-n; l++) {
+			ngramstr = tokens.get(l);
+			while (k < n) { ngramstr += " " + tokens.get(l+k); k++; }
+			k = 1;
+			ngramList.add(ngramstr);
+		}
+		for (String grams: ngramList) {
+			if (trigrams.containsKey(grams)) { trigrams.put(grams, trigrams.get(grams) + 1); } 
+			else { trigrams.put(grams, 1); }
+		}ngramList.clear();
+
+		// Find four-grams
+		n = 4;
+		k = 1;
+		for (int m=0; m<tokens.size()-n; m++) {
+			ngramstr = tokens.get(m);
+			while (k < n) { ngramstr += " " + tokens.get(m+k); k++; }
+			k = 1;
+			ngramList.add(ngramstr);
+		}
+		for (String grams: ngramList) {
+			if (fourgrams.containsKey(grams)) { fourgrams.put(grams, fourgrams.get(grams) + 1); } 
+			else { fourgrams.put(grams, 1); }
+		}ngramList.clear();		
+		
+		
+		// finds the n most frequent unigrams, bigrams, trigrams, and fourgrams
 		Map<String, Integer> ngrams_temp = new HashMap<String, Integer>();
 		n = 30;
 		
-		// extract top 30 unigrams
+		// extract top unigrams
 		List<Entry<String, Integer>> max_one = getMax(unigrams, n);
 		for (Entry<String, Integer> entry : max_one) { 
 			String key = entry.getKey();
 			int val = entry.getValue();
 			ngrams_temp.put(key, val);
-		} 
-		// extract top 30 bigrams
+		}
+		// extract top bigrams
 		List<Entry<String, Integer>> max_two = getMax(bigrams, n);
 		for (Entry<String, Integer> entry : max_two) {
 			String key = entry.getKey();
 			int val = entry.getValue();
 			ngrams_temp.put(key, val);
 		}
-
-		// find the top 30 out of 60 most frequent ngrams
-		List<Entry<String, Integer>> top_ngrams = getMax(ngrams_temp, n);
-		System.out.println("Top " + n + " unigrams and bigrams: ");
-		for (Entry<String, Integer> entry : top_ngrams) {
+		// extract top trigrams
+		List<Entry<String, Integer>> max_three = getMax(trigrams, n);
+		for (Entry<String, Integer> entry : max_three) {
 			String key = entry.getKey();
 			int val = entry.getValue();
-			ngramList.add(key);
-			System.out.println(key + ": " + val);
+			ngrams_temp.put(key, val);
+		}
+		// extract top fourgrams
+		List<Entry<String, Integer>> max_four = getMax(fourgrams, n);
+		for (Entry<String, Integer> entry : max_four) {
+			String key = entry.getKey();
+			int val = entry.getValue();
+			ngrams_temp.put(key, val);
 		}
 
+		// get the top ngrams
+		List<Entry<String, Integer>> top_ngrams = getMax(ngrams_temp, n);
+		//System.out.println("Top " + n + " unigrams and bigrams: ");
+		for (Entry<String, Integer> entry : top_ngrams) {
+			String key = entry.getKey();
+			ngramList.add(key);
+		} // ngramList is a list of type string that contains the top n ngrams
+
+		// parameter values for DocMatrix class
+		boolean unknowndoc = false;
+		String docname = "";
+		List<double[]> matrix = new ArrayList<double[]>();
+		
+		// get the tf-idf matrix of the corpus
 		DocMatrix docmatrix = new DocMatrix();
-		docmatrix.generate(ngramList);
+		docmatrix.generate(ngramList, unknowndoc, docname);
+		matrix = docmatrix.get();
+	
+		return matrix;	// Type is List<double[]>.
 		
 	}
 	
+	public List<String> get_ngrams() {
+		return ngramList;
+	}
+	
+	// Stanford Core NLP lemmatization function
 	private static List<String> lemmatize(String documentText) {
-
-		// set up pipeline properties
 	    Properties props = new Properties();
 	    props.setProperty("annotators", "tokenize, ssplit, pos, lemma,ner");
-	
-	    // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
 	    props.setProperty("coref.algorithm", "neural");
-	    
-	    // build pipeline
 	    StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
 	
 	    List<String> lemmas = new LinkedList<String>();
-	    
-	    // Create an empty Annotation just with the given text
 	    Annotation document = new Annotation(documentText);
-	    
-	    // run all Annotators on this text
+
 	    pipeline.annotate(document);
 	    
-	    // Iterate over all of the sentences found
 	    List<CoreMap> sentences = document.get(SentencesAnnotation.class);
 	    
 	    for(CoreMap sentence: sentences) {
-	        // Iterate over all tokens in a sentence
 	        for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
-	            // Retrieve and add the lemma for each word into the
-	            // list of lemmas
 	            lemmas.add(token.get(LemmaAnnotation.class));
 	        }
 	    }
 	    return lemmas;
 	}
 	
-	// get top unigrams and bigrams
+	// Functon to find the most frequent ngrams
 	private static <K, V extends Comparable<? super V>> List<Entry<K, V>> getMax(Map<K, V> map, int n) {
 		Comparator<? super Entry<K, V>> comparator = new Comparator<Entry<K, V>>() {
 			@Override
@@ -268,5 +310,4 @@ public class Preprocess {
 		}
 		return result;
 	}
-
 }

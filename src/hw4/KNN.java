@@ -1,6 +1,3 @@
-/**
- * 
- */
 package hw4;
 
 /**
@@ -31,17 +28,33 @@ import java.util.regex.Pattern;
 
 
 public class KNN {
+	
+	private String raw_doc = "";
+	private List<String> topics = new ArrayList<String>();
+	private Preprocess tfidf_matrix = new Preprocess();
+	private DocMatrix temp_matrix = new DocMatrix();
+	private double dist = 0.0;
+	private int k = 0;
+	
+	public KNN(List<String> ngrams, String raw_text, Preprocess corpus_matrix, int k) {
+		this.topics = ngrams;
+		this.raw_doc = raw_text;
+		this.tfidf_matrix = corpus_matrix;		
+	}
+	
+	public void findNearestNeighbors() {
+		
 
-	public static void start(String raw_doc, int sim_measure) {
-		
-		
 		
 	}
 	
-	private static void sim_measure () {
+	public void find_euclid_dist(double[] doc1, double[] doc2) {
+
+		double[] eucdist = new double[doc1.length];
 		
-		
-		
+		for(int i=0; i<doc1.length; i++) {
+			
+		}
 	}
 	
 }
