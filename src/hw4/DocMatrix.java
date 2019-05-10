@@ -29,7 +29,7 @@ public class DocMatrix {
 		String filename = "data/known_docs.txt";
 		int topics_size = ngramList.size();
 
-		// checks if generating a document matrix for the entire corpus
+		// checks if it's generating a tf-idf matrix for the entire corpus or for an unknown document.
 		if (unknowndoc==false) {	
 			BufferedReader reader;
 			try {

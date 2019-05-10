@@ -129,6 +129,7 @@ public class Preprocess {
 		}
 		tokens.removeAll(Collections.singleton(""));
 
+		// lemmatize with Stanford Core NLP
         String text = "";
         for (String token : tokens) {
         	text += token + " ";
@@ -138,11 +139,11 @@ public class Preprocess {
         List<String> lems = new ArrayList<String>();
         lems = lemmatize(text);
 
-        for (String l : lems) { 
+        for (String l : lems) {
         	if (l.matches("/s")){
         	} else {
         		tokens.add(l);
-        	} 
+        	}
         }
 
 		Map<String, Integer> unigrams = new HashMap<String, Integer>();
@@ -198,7 +199,7 @@ public class Preprocess {
 
 		// finds the n most frequent unigrams, bigrams, trigrams, and fourgrams
 		Map<String, Integer> ngrams_temp = new HashMap<String, Integer>();
-		n = 30;
+		n = 50;
 
 		List<Entry<String, Integer>> max_one = getMax(unigrams, n);
 		for (Entry<String, Integer> entry : max_one) { 

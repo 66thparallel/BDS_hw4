@@ -20,6 +20,7 @@ public class ClassifyTextualData {
 	public static void main(String[] args) {
 
 		int k = 5;													// the k-value for KNN
+		
 		List<double[]> corpus_matrix = new ArrayList<double[]>();
 		List<String> topics = new ArrayList<String>();
 

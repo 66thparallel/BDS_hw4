@@ -116,23 +116,18 @@ public class KNN {
 
 			nearest_neighbors = sortByKey(dist_and_labels);
 
-			int k_count = k;
-		    for(Double key : nearest_neighbors.descendingKeySet()){ 
-		    	if(k_count>0) {
-		    		neighbors.add(key);
-		    	}
-		    	k_count--;
-		    }
-
 		    // output the kNN values to a text file
 		    try {
 	            FileWriter writer = new FileWriter("knn.txt", true);
 	            BufferedWriter bufferedWriter = new BufferedWriter(writer);
 
-			    for (Double key : neighbors) {
-			    	String val = nearest_neighbors.get(key);
-			    	System.out.println("Distance: " + key + ", Label: " + val);
-			    	bufferedWriter.write("Distance: " + key + ", Label: " + val + "\n");
+				int k_count = k;
+			    for(Map.Entry<Double,String> key : nearest_neighbors.entrySet()){ 
+			    	if(k_count>0) {
+			    		System.out.println("Distance: " + key.getKey() + ", Label: " + key.getValue());
+			    		bufferedWriter.write("Distance: " + key.getKey() + ", Label: " + key.getValue() + "\n");
+			    	}
+			    	k_count--;
 			    }
 			    System.out.println("\n");
 	            bufferedWriter.newLine();
@@ -144,8 +139,6 @@ public class KNN {
 			dist_and_labels.clear();
 			neighbors.clear();
 		}
-
-
 	}
 
 	public static double[] getEuclidDist(double[] row_unknown, double[][] matrix_corpus) {
