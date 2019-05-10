@@ -1,22 +1,20 @@
 package hw4;
 
-import java.io.*;
-import java.util.*;
+/**
+ * @author Jane Liu
+ * Homework 4
+ * 
+ * Class:
+ * 	DocMatrix:
+ * 		Generates a TF-idf document term matrix. Depending on parameters passed the generate function can create 
+ * 		and return a TF-idf matrix for the corpus or for a single unknown document.
+ */
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.*; 
-
-/**
- * @author Jane Liu
- * 
- * Class:
- * 	DocMatrix:
- * 		Generates a TF-idf document term matrix. Depending on parameters passed the generate function can create 
- * 		and return a TF-idf matrix for the entire corpus or for one unknown document.
- */
 
 
 public class DocMatrix {

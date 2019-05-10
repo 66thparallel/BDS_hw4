@@ -1,13 +1,14 @@
 package hw4;
 
 /**
- * @author Jane
+ * @author Jane Liu
  * Homework 4
  * 
  * Class:
  * 	KNN:
- * 		Takes a raw document and a similarity measure as input, and returns as output the k most similar 
- * 		(“nearest”) documents in the TF-IDF matrix, as well as their labels/topics.
+ * 		Accepts a list of topics, the tf-idf matrix of the corpus, and the k-value for the KNN algorithm. It opens a document 
+ * 		file with the file names and paths of all the unknown documents, calculates the Euclidean distances, and outputs the k nearest
+ * 		neighbors to the console and to a file in the working directory called knn.txt.
  */
 
 import java.io.BufferedReader;
@@ -129,8 +130,6 @@ public class KNN {
 		    try {
 	            FileWriter writer = new FileWriter("knn.txt", true);
 	            BufferedWriter bufferedWriter = new BufferedWriter(writer);
-	            bufferedWriter.write("KNN Results:");
-	            bufferedWriter.newLine();
 	            
 			    for (Double key : neighbors) {
 			    	String val = nearest_neighbors.get(key);
@@ -138,7 +137,6 @@ public class KNN {
 			    	bufferedWriter.write("Distance: " + key + " Label: " + val + "\n");
 			    }
 			    System.out.println("\n");
-	            bufferedWriter.newLine();
 	            bufferedWriter.newLine();
 	            bufferedWriter.close();
 	        } catch (IOException e) {

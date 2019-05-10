@@ -6,7 +6,7 @@ package hw4;
  * 
  * Preprocess class:
  * 	Reads the unknown files, cleans the data, tokenizes, removes stopwords, lemmatizes, finds the most frequent 
- * 	unigrams and bigrams, creates the document term matrix and transforms with TF-IDF. Returns the processed corpus.
+ * 	unigrams and bigrams, creates the document term matrix and transforms with TF-IDF. Returns the preprocessed corpus.
  *
  */
 
@@ -133,22 +133,22 @@ public class Preprocess {
 		}
 		tokens.removeAll(Collections.singleton(""));
 
-//		// lemmatize the corpus with Stanford NLP
-//        String text = "";
-//        for (String token : tokens) {
-//        	text += token + " ";
-//        }
-//        tokens.clear();
-//        
-//        List<String> lems = new ArrayList<String>();
-//        lems = lemmatize(text);
-//        
-//        for (String l : lems) { 
-//        	if (l.matches("/s")){
-//        	} else {
-//        		tokens.add(l);
-//        	} 
-//        }
+		// lemmatize the corpus with Stanford NLP
+        String text = "";
+        for (String token : tokens) {
+        	text += token + " ";
+        }
+        tokens.clear();
+        
+        List<String> lems = new ArrayList<String>();
+        lems = lemmatize(text);
+        
+        for (String l : lems) { 
+        	if (l.matches("/s")){
+        	} else {
+        		tokens.add(l);
+        	} 
+        }
 		
 		// Find ngrams
 		Map<String, Integer> unigrams = new HashMap<String, Integer>();
@@ -241,7 +241,6 @@ public class Preprocess {
 
 		// get the top ngrams
 		List<Entry<String, Integer>> top_ngrams = getMax(ngrams_temp, n);
-		//System.out.println("Top " + n + " unigrams and bigrams: ");
 		for (Entry<String, Integer> entry : top_ngrams) {
 			String key = entry.getKey();
 			ngramList.add(key);
@@ -257,7 +256,7 @@ public class Preprocess {
 		docmatrix.generate(ngramList, unknowndoc, docname);
 		matrix = docmatrix.get();
 	
-		return matrix;	// Type is List<double[]>.
+		return matrix;	// returns the tf-idf matrix for the corpus
 		
 	}
 	
