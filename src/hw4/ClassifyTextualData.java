@@ -22,22 +22,17 @@ public class ClassifyTextualData {
 		 * 2. Output the classification of the unknown document.
 		 */
 
-		int k = 5;	// the k-value for KNN
+		int k = 5;													// the k-value for KNN
 		List<double[]> corpus_matrix = new ArrayList<double[]>();
 		List<String> topics = new ArrayList<String>();
 		
 		Preprocess prep_data = new Preprocess();
-		corpus_matrix = prep_data.start();
-		topics = prep_data.get_ngrams();
-		
-//		// print the tf matrix
-//		for (double[] rw : corpus_matrix) {
-//			for(int i=0; i<30; i++) { System.out.print(rw[i] + ", "); }
-//			System.out.println();
-//		}
+		corpus_matrix = prep_data.start();							// tf-idf matrix of the corpus
+		topics = prep_data.get_ngrams();							// most frequent n ngram topics
 		
 		// classify the unknown documents
-		
+		KNN _knn = new KNN(topics, corpus_matrix, k);
+		_knn.findNearestNeighbors();
 		
 		
 		
