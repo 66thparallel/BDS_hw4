@@ -13,8 +13,13 @@ package hw4;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class DocMatrix {
@@ -26,7 +31,7 @@ public class DocMatrix {
 	public void generate(List<String> ngramList, boolean unknowndoc, String docname) {
 
 		List<String> docs = new ArrayList<String>();
-		String filename = "data/known_docs.txt";
+		String filename = "data/corpus/known_docs.txt";
 		int topics_size = ngramList.size();
 
 		// checks if it's generating a tf-idf matrix for the entire corpus or for an unknown document.
@@ -45,7 +50,7 @@ public class DocMatrix {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}else {
+		} else {
 			docs.add(docname);
 		}
 
@@ -55,16 +60,18 @@ public class DocMatrix {
 		double[] row = new double[topics_size];
 		int[] topic_count = new int[topics_size];
 		String text = "";
+		String path = "";
 		int count = 0;
 		int tokens_count = 0;
 		double term_frequency = 0f;
 
 		BufferedReader reader2;
+		
+		if (unknowndoc==true) {path="data/";} else {path="data/corpus/";}
 
 		for (String doc : docs) {
-			String file = "data/" + doc;
 			try {
-				reader2 = new BufferedReader(new FileReader(file));
+				reader2 = new BufferedReader(new FileReader(path + doc));
 				String line = reader2.readLine();
 
 				while (line != null) {

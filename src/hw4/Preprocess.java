@@ -13,6 +13,9 @@ package hw4;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +28,8 @@ import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import edu.stanford.nlp.ling.CoreAnnotations.NamedEntityTagAnnotation;
 import edu.stanford.nlp.ling.CoreAnnotations.PartOfSpeechAnnotation;
@@ -52,18 +57,18 @@ public class Preprocess {
 		List<String> stopwords = new ArrayList<String>();
 		List<String> tempwords = new ArrayList<String>();
 		List<String> tokens = new ArrayList<String>();
-		String filename = "data/known_docs.txt";
+		String filename = "data/corpus/known_docs.txt";
 
-		BufferedReader reader;
+		BufferedReader reader1;
 		try {
-			reader = new BufferedReader(new FileReader(filename));
-			String line = reader.readLine();
+			reader1 = new BufferedReader(new FileReader(filename));
+			String line = reader1.readLine();
 
 			while (line != null) {
 				docs.add(line);
-				line = reader.readLine();
+				line = reader1.readLine();
 			}
-			reader.close();
+			reader1.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -71,7 +76,7 @@ public class Preprocess {
 
 		BufferedReader reader2;
 		for (String doc : docs) {
-			String file = "data/" + doc;
+			String file = "data/corpus/" + doc;
 			try {
 				reader2 = new BufferedReader(new FileReader(file));
 				String line = reader2.readLine();
@@ -102,7 +107,7 @@ public class Preprocess {
 		}tempwords.clear();
 
 		try {
-			reader = new BufferedReader(new FileReader("data/stopwords.txt"));
+			BufferedReader reader = new BufferedReader(new FileReader("data/stopwords.txt"));
 			String line2 = reader.readLine();
 
 			while (line2 != null) {
@@ -199,7 +204,7 @@ public class Preprocess {
 
 		// finds the n most frequent unigrams, bigrams, trigrams, and fourgrams
 		Map<String, Integer> ngrams_temp = new HashMap<String, Integer>();
-		n = 50;
+		n = 100;
 
 		List<Entry<String, Integer>> max_one = getMax(unigrams, n);
 		for (Entry<String, Integer> entry : max_one) { 
@@ -233,6 +238,7 @@ public class Preprocess {
 		List<Entry<String, Integer>> top_ngrams = getMax(ngrams_temp, n);
 		for (Entry<String, Integer> entry : top_ngrams) {
 			String key = entry.getKey();
+			int val = entry.getValue();
 			ngramList.add(key);
 		}
 
@@ -275,7 +281,7 @@ public class Preprocess {
 	    return lemmas;
 	}
 
-	// Functon to find the most frequent ngrams
+	// function to find the most frequent ngrams
 	private static <K, V extends Comparable<? super V>> List<Entry<K, V>> getMax(Map<K, V> map, int n) {
 		Comparator<? super Entry<K, V>> comparator = new Comparator<Entry<K, V>>() {
 			@Override
@@ -298,4 +304,6 @@ public class Preprocess {
 		}
 		return result;
 	}
+	
+	
 }

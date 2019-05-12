@@ -1,5 +1,30 @@
 package hw4;
 	
+import java.io.BufferedReader;
+
+/**
+ * @author Jane Liu
+ * Homework 4
+ * 
+ * Class:
+ * 	KNN:
+ * 		Accepts a list of topics, the tf-idf matrix of the corpus, and the k-value for the KNN algorithm. 
+ * 		It traverses the subfolders of /data/ and reads each unknown document, calculates the Euclidean 
+ * 		distances, and outputs the k nearest neighbors to the console and to a file in the main  
+ * 		directory called knn.txt.
+ */
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 /**
  * @author Jane Liu
  * Homework 4
@@ -11,30 +36,15 @@ package hw4;
  * 		neighbors to the console and to a file in the working directory called knn.txt.
  */
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
-
 public class KNN {
 
 	private List<String> topics = new ArrayList<String>();
-	private List<String> raw_texts = new ArrayList<String>();
 	private List<double[]> corpus_matrix = new ArrayList<double[]>();
 	private List<double[]> matrix_of_unknowns = new ArrayList<double[]>();
 	private List<double[]> temprow = new ArrayList<double[]>();
 	private DocMatrix unknown_row = new DocMatrix();
 	private int k = 0;
 	private int doc_count = 0;
-	private int row_count = 0;
 	boolean unknown_flag = true;
 
 	public KNN(List<String> ngrams, List<double[]> corpus_matrix, int k) {
@@ -43,10 +53,11 @@ public class KNN {
 		this.k = k;		
 	}
 
-	public void findNearestNeighbors() {
+	public void findNearestNeighbors(TreeMap<String, Integer> labels_map) {
 
 		List<String> docs = new ArrayList<String>();
 		String filename = "data/unknown_docs.txt";
+		
 		BufferedReader reader1;
 		try {
 			reader1 = new BufferedReader(new FileReader(filename));
@@ -60,7 +71,7 @@ public class KNN {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}		
 
 		double[] row = new double[topics.size()];
 
@@ -95,28 +106,36 @@ public class KNN {
 		}
 
 		// find the k nearest neighbors
-		double[] distances = new double[doc_count];
 		List<Double> neighbors = new ArrayList<Double>();
-		Map<Double, String> dist_and_labels = new HashMap<Double, String>();
 		TreeMap<Double, String> nearest_neighbors = new TreeMap<Double, String>();
+		
+		// delete output file knn.txt if it already exists
+		File f = new File("knn.txt");
+		if(f.exists()){f.delete();}
 
 		for(int i=0; i<matrix_unknowns.length; i++) {
+			
+			double[] distances = new double[doc_count];
 
+			// array of doubles containing the distance between each document of the corpus to the unknown document.
 			distances = getEuclidDist(matrix_unknowns[i], matrix_corpus);
-
-			for(int j=0; j<distances.length; j++) {
-				if (j >= 0 && j <= 8) {
-					dist_and_labels.put(distances[j], "C1");
-				}else if(j>=9 && j<=16) {
-					dist_and_labels.put(distances[j], "C4");
-				}else {
-					dist_and_labels.put(distances[j], "C7");
+			
+			int index = 0;
+			int num_of_articles = 0;
+			
+			for(Map.Entry<String, Integer> key : labels_map.entrySet()){
+			
+	    		String label = key.getKey();
+				num_of_articles += (int)key.getValue();
+				
+				for(int j=index; j<(num_of_articles); j++) {
+					nearest_neighbors.put(distances[j], label);
 				}
-			}
+				index = num_of_articles;
+			
+	    	}
 
-			nearest_neighbors = sortByKey(dist_and_labels);
-
-		    // output the kNN values to a text file
+		    // output the k nearest neighbors to knn.txt
 		    try {
 	            FileWriter writer = new FileWriter("knn.txt", true);
 	            BufferedWriter bufferedWriter = new BufferedWriter(writer);
@@ -135,9 +154,8 @@ public class KNN {
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }
-
-			dist_and_labels.clear();
 			neighbors.clear();
+			nearest_neighbors.clear();
 		}
 	}
 
@@ -158,13 +176,6 @@ public class KNN {
 			curr_dist = 0;
 		}
 		return distances;
-	}
-
-    public static TreeMap<Double, String> sortByKey(Map<Double, String> map) { 
-
-        TreeMap<Double, String> sorted = new TreeMap<>();
-        sorted.putAll(map); 
-        return sorted;
-    }	
+	}	
 
 }
